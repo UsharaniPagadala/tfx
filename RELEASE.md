@@ -31,6 +31,9 @@
     default publisher to the TFX SDK version.
 *   Depends on `absl-py>=0.9,<0.13`.
 *   Depends on `packaging>=20,<21`.
+*   Factored out tensorflow-ranking example dependencies into a dedicated extra
+    `[tf-ranking]`. Because TensorFlow Ranking requires TF 2 or later, we cound
+    not install `[examples]` with TF1.
 
 ## Documentation Updates
 *   Simplified Apache Spark and Flink example deployment scripts by using Beam's
