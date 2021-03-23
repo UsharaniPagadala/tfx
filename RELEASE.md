@@ -12,24 +12,6 @@
 
 ## Breaking Changes
 
-*   Starting in this version, following artifacts will be stored in new format,
-    but artifacts produced by older versions can be read in a backwards
-    compatible way:
-    *   Change split sub-folder format to 'Split-<split_name>', this applies to
-        all artifacts that contain splits. Old format '<split_name>' can still
-        be loaded by TFX.
-    *   Change Model artifact's sub-folder name to 'Format-TFMA' for eval model
-        and 'Format-Serving' for serving model. Old Model artifact format
-        ('eval_model_dir'/'serving_model_dir') can still be loaded by TFX.
-    *   Change ExampleStatistics artifact payload to binary proto
-        FeatureStats.pb file. Old payload format (tfrecord stats_tfrecord file)
-        can still be loaded by TFX.
-    *   Change ExampleAnomalies artifact payload to binary proto SchemaDiff.pb
-        file. Old payload format (text proto anomalies.pbtxt file) is deprecated
-        as TFX doesn't have downstream components that take ExampleAnomalies
-        artifact.
-
-
 ### For Pipeline Authors
 
 *  CLI requires Apache Airflow 1.10.14 or later. If you are using an older
@@ -198,39 +180,6 @@
 *   Depends on `tensorflow-serving-api>=1.15,!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3`.
 *   Depends on `tensorflow-transform>=0.27.0,<0.28.0`.
 *   Depends on `tfx-bsl>=0.27.0,<0.28.0`.
-
-## Documentation updates
-
-*   N/A
-
-# Version 0.26.3
-
-*   This a bug fix only version.
-
-## Major Features and Improvements
-
-*   N/A
-
-## Breaking changes
-
-*   N/A
-
-### For pipeline authors
-
-*   N/A
-
-### For component authors
-
-*   N/A
-
-## Deprecations
-
-*   N/A
-
-## Bug fixes and other changes
-
-*   Automatic autoreload of underlying modules a single `_ModuleFinder`
-    registered per module.
 
 ## Documentation updates
 

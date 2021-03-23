@@ -28,7 +28,7 @@ from tfx.utils import json_utils
 
 
 # Default file name for stats generated.
-_DEFAULT_FILE_NAME = 'FeatureStats.pb'
+_DEFAULT_FILE_NAME = 'stats_tfrecord'
 
 _TELEMETRY_DESCRIPTORS = ['StatisticsGen']
 
@@ -122,7 +122,7 @@ class Executor(base_executor.BaseExecutor):
       if split in exclude_splits:
         continue
 
-      uri = artifact_utils.get_split_uri([examples], split)
+      uri = os.path.join(examples.uri, split)
       split_and_tfxio.append(
           (split, tfxio_factory(io_utils.all_files_pattern(uri))))
     with self._make_beam_pipeline() as p:
@@ -137,6 +137,6 @@ class Executor(base_executor.BaseExecutor):
             | 'GenerateStatistics[%s]' % split >>
             stats_api.GenerateStatistics(stats_options)
             | 'WriteStatsOutput[%s]' % split >>
-            stats_api.WriteStatisticsToBinaryFile(output_path))
+            stats_api.WriteStatisticsToTFRecord(output_path))
         logging.info('Statistics for split %s written to %s.', split,
                      output_uri)

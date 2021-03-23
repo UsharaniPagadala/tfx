@@ -131,8 +131,7 @@ class Executor(base_executor.BaseExecutor):
       return
     model_export = artifact_utils.get_single_instance(
         input_dict[standard_component_specs.MODEL_KEY])
-    model_path = path_utils.serving_model_path(
-        model_export.uri, path_utils.is_old_model_artifact(model_export))
+    model_path = path_utils.serving_model_path(model_export.uri)
 
     # Push model to the destination, which can be listened by a model server.
     #

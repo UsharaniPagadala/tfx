@@ -83,8 +83,7 @@ def build_requests(  # pylint: disable=invalid-name
   if kind == _TENSORFLOW_SERVING:
     spec = request_spec.tensorflow_serving
     signatures = _parse_saved_model_signatures(
-        model_path=path_utils.serving_model_path(
-            model.uri, path_utils.is_old_model_artifact(model)),
+        model_path=path_utils.serving_model_path(model.uri),
         tag_set=spec.tag_set,
         signature_names=spec.signature_names)
     builder = _TFServingRpcRequestBuilder(
@@ -181,8 +180,7 @@ class _BaseRequestBuilder(six.with_metaclass(abc.ABCMeta, object)):
               split_name, ', '.join(available_splits)))
 
     # ExampleGen generates artifacts under each split_name directory.
-    glob_pattern = os.path.join(
-        artifact_utils.get_split_uri([examples], split_name), '*')
+    glob_pattern = os.path.join(examples.uri, split_name, '*')
     tfxio_factory = tfxio_utils.get_tfxio_factory_from_artifact(
         examples=[examples],
         telemetry_descriptors=_TELEMETRY_DESCRIPTORS,

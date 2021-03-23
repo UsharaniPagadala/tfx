@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Compiles a TFX pipeline into a TFX DSL IR proto."""
+import json
+import re
 from typing import cast, Iterable, List, Mapping
 
 from tfx import types
@@ -226,6 +228,12 @@ class Compiler(object):
           compiler_utils.set_runtime_parameter_pb(
               parameter_value.runtime_parameter, value.name, value.ptype,
               value.default)
+        elif isinstance(value, str) and re.search(
+            data_types.RUNTIME_PARAMETER_PATTERN, value):
+          runtime_param = json.loads(value)
+          compiler_utils.set_runtime_parameter_pb(
+              parameter_value.runtime_parameter, runtime_param.name,
+              runtime_param.ptype, runtime_param.default)
         else:
           try:
             data_types_utils.set_metadata_value(parameter_value.field_value,
@@ -412,7 +420,6 @@ class Compiler(object):
     Returns:
       A Pipeline proto that encodes all necessary information of the pipeline.
     """
-    _validate_pipeline(tfx_pipeline)
     context = _CompilerContext.from_tfx_pipeline(tfx_pipeline)
     pipeline_pb = pipeline_pb2.Pipeline()
     pipeline_pb.pipeline_info.id = context.pipeline_info.pipeline_name
@@ -426,6 +433,8 @@ class Compiler(object):
           pipeline_pb.runtime_spec.pipeline_run_id.runtime_parameter,
           constants.PIPELINE_RUN_ID_PARAMETER_NAME, str)
 
+    assert compiler_utils.ensure_topological_order(tfx_pipeline.components), (
+        "Pipeline components are not topologically sorted.")
     deployment_config = pipeline_pb2.IntermediateDeploymentConfig()
     if tfx_pipeline.metadata_connection_config:
       deployment_config.metadata_connection_config.Pack(
@@ -494,13 +503,3 @@ def _check_property_value_type(property_name: str,
                 artifact_type.properties[property_name]),
             metadata_store_pb2.PropertyType.Name(prop_value_type),
             property_value))
-
-
-def _validate_pipeline(tfx_pipeline: pipeline.Pipeline):
-  """Performs pre-compile validations."""
-  if (tfx_pipeline.execution_mode == pipeline.ExecutionMode.ASYNC and
-      compiler_utils.has_task_dependency(tfx_pipeline)):
-    raise ValueError("Task dependency is not supported in ASYNC mode.")
-
-  if not compiler_utils.ensure_topological_order(tfx_pipeline.components):
-    raise ValueError("Pipeline components are not topologically sorted.")

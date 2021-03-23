@@ -1,3 +1,4 @@
+# Lint as: python2, python3
 # Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,14 @@
 # limitations under the License.
 """Tests for tfx.orchestration.kubeflow.base_component."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import json
 import os
 
-from absl import logging
+import absl
 from kfp import dsl
 import tensorflow as tf
 from tfx.components.example_gen.csv_example_gen import component as csv_example_gen_component
@@ -26,7 +31,6 @@ from tfx.orchestration import pipeline as tfx_pipeline
 from tfx.orchestration.kubeflow import base_component
 from tfx.orchestration.kubeflow.proto import kubeflow_pb2
 from tfx.orchestration.launcher import in_process_component_launcher
-from tfx.proto.orchestration import pipeline_pb2
 from tfx.types import channel_utils
 from tfx.types import standard_artifacts
 
@@ -56,7 +60,6 @@ class BaseComponentTest(tf.test.TestCase):
 
     self._metadata_config = kubeflow_pb2.KubeflowMetadataConfig()
     self._metadata_config.mysql_db_service_host.environment_variable = 'MYSQL_SERVICE_HOST'
-    self._tfx_ir = pipeline_pb2.Pipeline()
     with dsl.Pipeline('test_pipeline'):
       self.component = base_component.BaseComponent(
           component=statistics_gen,
@@ -69,7 +72,6 @@ class BaseComponentTest(tf.test.TestCase):
           tfx_image='container_image',
           kubeflow_metadata_config=self._metadata_config,
           component_config=None,
-          tfx_ir=self._tfx_ir,
       )
     self.tfx_component = statistics_gen
 
@@ -111,9 +113,10 @@ class BaseComponentTest(tf.test.TestCase):
 
     except AssertionError:
       # Print out full arguments for debugging.
-      logging.error('==== BEGIN CONTAINER OP ARGUMENT DUMP ====')
-      logging.error(json.dumps(self.component.container_op.arguments, indent=2))
-      logging.error('==== END CONTAINER OP ARGUMENT DUMP ====')
+      absl.logging.error('==== BEGIN CONTAINER OP ARGUMENT DUMP ====')
+      absl.logging.error(
+          json.dumps(self.component.container_op.arguments, indent=2))
+      absl.logging.error('==== END CONTAINER OP ARGUMENT DUMP ====')
       raise
 
   def testContainerOpName(self):
@@ -156,7 +159,6 @@ class BaseComponentWithPipelineParamTest(tf.test.TestCase):
 
     self._metadata_config = kubeflow_pb2.KubeflowMetadataConfig()
     self._metadata_config.mysql_db_service_host.environment_variable = 'MYSQL_SERVICE_HOST'
-    self._tfx_ir = pipeline_pb2.Pipeline()
     with dsl.Pipeline('test_pipeline'):
       self.example_gen = base_component.BaseComponent(
           component=example_gen,
@@ -168,8 +170,7 @@ class BaseComponentWithPipelineParamTest(tf.test.TestCase):
           pipeline_root=test_pipeline_root,
           tfx_image='container_image',
           kubeflow_metadata_config=self._metadata_config,
-          component_config=None,
-          tfx_ir=self._tfx_ir)
+          component_config=None)
       self.statistics_gen = base_component.BaseComponent(
           component=statistics_gen,
           component_launcher_class=in_process_component_launcher
@@ -180,7 +181,7 @@ class BaseComponentWithPipelineParamTest(tf.test.TestCase):
           pipeline_root=test_pipeline_root,
           tfx_image='container_image',
           kubeflow_metadata_config=self._metadata_config,
-          component_config=None
+          component_config=None,
       )
 
     self.tfx_example_gen = example_gen
@@ -220,8 +221,6 @@ class BaseComponentWithPipelineParamTest(tf.test.TestCase):
         formatted_statistics_gen,
         '--component_config',
         'null',
-        '--node_id',
-        'StatisticsGen.foo',
     ]
     example_gen_expected_args = [
         '--pipeline_name',
@@ -244,10 +243,6 @@ class BaseComponentWithPipelineParamTest(tf.test.TestCase):
         formatted_example_gen,
         '--component_config',
         'null',
-        '--node_id',
-        'CsvExampleGen',
-        '--tfx_ir',
-        '{}',
     ]
     try:
       self.assertEqual(
@@ -260,14 +255,17 @@ class BaseComponentWithPipelineParamTest(tf.test.TestCase):
           example_gen_expected_args)
     except AssertionError:
       # Print out full arguments for debugging.
-      logging.error('==== BEGIN STATISTICSGEN CONTAINER OP ARGUMENT DUMP ====')
-      logging.error(
+      absl.logging.error(
+          '==== BEGIN STATISTICSGEN CONTAINER OP ARGUMENT DUMP ====')
+      absl.logging.error(
           json.dumps(self.statistics_gen.container_op.arguments, indent=2))
-      logging.error('==== END STATISTICSGEN CONTAINER OP ARGUMENT DUMP ====')
-      logging.error('==== BEGIN EXAMPLEGEN CONTAINER OP ARGUMENT DUMP ====')
-      logging.error(
+      absl.logging.error(
+          '==== END STATISTICSGEN CONTAINER OP ARGUMENT DUMP ====')
+      absl.logging.error(
+          '==== BEGIN EXAMPLEGEN CONTAINER OP ARGUMENT DUMP ====')
+      absl.logging.error(
           json.dumps(self.example_gen.container_op.arguments, indent=2))
-      logging.error('==== END EXAMPLEGEN CONTAINER OP ARGUMENT DUMP ====')
+      absl.logging.error('==== END EXAMPLEGEN CONTAINER OP ARGUMENT DUMP ====')
       raise
 
   def testContainerOpName(self):
