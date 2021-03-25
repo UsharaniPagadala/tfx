@@ -19,6 +19,7 @@ from typing import Optional, Type, TypeVar
 
 import attr
 from tfx.orchestration import metadata
+from tfx.orchestration.experimental.core import common_utils
 from tfx.orchestration.experimental.core import status as status_lib
 from tfx.orchestration.experimental.core import task as task_lib
 from tfx.proto.orchestration import execution_result_pb2
@@ -140,17 +141,12 @@ class TaskSchedulerRegistry:
       raise NotImplementedError(
           'Can create a task scheduler only for an `ExecNodeTask`.')
     task = typing.cast(task_lib.ExecNodeTask, task)
-    # TODO(b/170383494): Decide which DeploymentConfig to use.
-    if not pipeline.deployment_config.Is(
-        pipeline_pb2.IntermediateDeploymentConfig.DESCRIPTOR):
-      raise ValueError('No deployment config found in pipeline IR.')
-    depl_config = pipeline_pb2.IntermediateDeploymentConfig()
-    pipeline.deployment_config.Unpack(depl_config)
-    node_id = task.node_uid.node_id
-    if node_id not in depl_config.executor_specs:
+    executor_spec = common_utils.get_executor_spec(pipeline,
+                                                   task.node_uid.node_id)
+    if executor_spec is None:
       raise ValueError(
-          'Executor spec for node id `{}` not found in pipeline IR.'.format(
-              node_id))
-    executor_spec_type_url = depl_config.executor_specs[node_id].type_url
+          f'Executor spec for node id `{task.node_uid.node_id}` not found in '
+          f'pipeline IR.')
+    executor_spec_type_url = executor_spec.type_url
     return cls._task_scheduler_registry[executor_spec_type_url](
         mlmd_handle=mlmd_handle, pipeline=pipeline, task=task)
