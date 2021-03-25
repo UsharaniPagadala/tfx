@@ -56,17 +56,23 @@ the local TFX version. If an unreleased version of TFX is being used
 (e.g. installing from HEAD), `Dockerfile` may need to be modified to install the
 unreleased version.
 
-Set the project id and bucket in `penguin_pipeline_sklearn_gcp.py`. Then, run the
-following commands to copy the `~/penguin` directory to GCS and execute the
-pipeline python file. Output can be found at `[BUCKET]/tfx` and metadata will
-be stored in `~/tfx`:
+Set the project id and bucket in `penguin_pipeline_sklearn_gcp.py`. Then, run
+the following commands to copy the `~/penguin` directory to GCS and execute the
+pipeline python file. Output can be found at `[BUCKET]/tfx`.
 
 <pre class="devsite-terminal devsite-click-to-copy">
 vi ~/penguin/experimental/penguin_pipeline_sklearn_gcp.py
 gsutil cp -r ~/penguin/data gs://[BUCKET]/penguin
 gsutil cp -r ~/penguin/experimental gs://[BUCKET]/penguin
-python ~/penguin/experimental/penguin_pipeline_sklearn_gcp.py
+
+pip install kfp
+tfx pipeline create \
+  --engine kubeflow \
+  --pipeline-path penguin_pipeline_sklearn_gcp.py \
+  --endpoint my-gcp-endpoint.pipelines.googleusercontent.com
 </pre>
 
-Note that `gsutil cp -r ~/penguin/experimental gs://[BUCKET]/penguin` will need to be
-run every time updates are made to `penguin_pipeline_sklearn_gcp.py`.
+Note that `gsutil cp -r ~/penguin/experimental gs://[BUCKET]/penguin` will need
+to be run every time updates are made to `penguin_pipeline_sklearn_gcp.py`.
+Additionally, subsequent pipeline deployments should use `tfx pipeline update`
+instead of `tfx pipeline create`.
