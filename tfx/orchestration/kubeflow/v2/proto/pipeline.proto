@@ -718,6 +718,8 @@ message PipelineDeploymentConfig {
   }
 
   message AIPlatformCustomJobSpec {
+    option deprecated = true;
+
     // API Specification for invoking a Google Cloud AI Platform CustomJob.
     // The fields must match the field names and structures of CustomJob
     // defined in
@@ -730,6 +732,8 @@ message PipelineDeploymentConfig {
   }
 
   message DataflowFlexTemplateSpec {
+    option deprecated = true;
+
     // API Specification for launching a Dataflow flex template.
     // The fields must match the field names and structures defined in
     // https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.locations.flexTemplates/launch#request-body
@@ -750,9 +754,9 @@ message PipelineDeploymentConfig {
       // Resolves an existing artifact.
       ResolverSpec resolver = 3;
       // Starts a Google Cloud AI Platform CustomJob.
-      AIPlatformCustomJobSpec custom_job = 4;
+      AIPlatformCustomJobSpec custom_job = 4 [deprecated = true];
       // Launches a dataflow flex template.
-      DataflowFlexTemplateSpec dataflow_flex_template = 5;
+      DataflowFlexTemplateSpec dataflow_flex_template = 5 [deprecated = true];
     }
   }
   // Map from executor label to executor spec.
