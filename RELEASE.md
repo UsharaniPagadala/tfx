@@ -9,6 +9,8 @@
    (both enabled by default).
 *  Added an accessor (`.data_view_decode_fn`) to the decoder function wrapped in
    the DataView in Trainer `FnArgs.data_accessor`.
+*  Updated CloudTuner KFP e2e example running on Google Cloud Platform with
+   distributed tuning and GPU distributed training for each trial.
 
 ## Breaking Changes
 
